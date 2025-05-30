@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    working_dir: /var/www
+    volumes:
+      - ./backend:/var/www
+    env_file:
+      - .env                    # Подключаем переменные окружения из .env
+    networks:
+      - camagru-net
+
+  nginx:
+    image: nginx:alpine
+    depends_on:
+      - php
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./frontend/src:/var/www/frontend:ro
+      - ./backend/public:/var/www/public:ro
+    env_file:
+      - .env                    # Подключаем переменные окружения из .env
+    networks:
+      - camagru-net
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${DB_USER}           # Переменные подставляются из .env
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    env_file:
+      - .env                    # Подключаем переменные окружения из .env
+    networks:
+      - camagru-net
+
+networks:
+  camagru-net:
+    driver: bridge
+
+volumes:
+  pgdata:

@@ -1,0 +1,5 @@
+*/*.env
+**/**.log
+public/uploads/*
+.env
+backend/public/uploads
