@@ -20,13 +20,7 @@ class ImageController extends Controller
 
         $images = $service->listAll();
         $data = array_map(fn($img) => $img->toArray(), $images);
-        $this->json($data, 200);
-
-    }
-
-    public function view(string $id): void
-    {
-        echo("view");
+        $this->json($data);
     }
 
     public function upload(): void

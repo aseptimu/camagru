@@ -10,9 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let stream = null;
 
-    // 1) Загрузка галереи
     async function loadGallery() {
-        gallery.innerHTML = 'Загрузка…';
+        gallery.innerHTML = 'Loading…';
         try {
             const res = await fetch('/api/images');
             if (!res.ok) throw new Error(res.status);
@@ -25,34 +24,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 gallery.appendChild(img);
             });
         } catch (e) {
-            gallery.innerHTML = `<p style="color:red">Ошибка: ${e.message}</p>`;
+            gallery.innerHTML = `<p class="error">Ошибка: ${e.message}</p>`;
         }
     }
     loadGallery();
 
-    // 2) Кнопка «Upload Image»
     uploadBtn.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', async () => {
         if (!fileInput.files.length) return;
         const fd = new FormData();
         fd.append('image', fileInput.files[0]);
         await uploadFormData(fd);
-        loadGallery();
+        await loadGallery();
     });
 
-    // 3) Запуск камеры
     startCamBtn.addEventListener('click', async () => {
-        cameraDiv.style.display = '';
+        cameraDiv.style.display = 'block'
         if (stream) return;
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: true });
             video.srcObject = stream;
         } catch (err) {
-            alert('Не удалось получить доступ к камере: ' + err.message);
+            alert('Unable to access camera: ' + err.message);
         }
     });
 
-    // 4) Остановка камеры
     stopCamBtn.addEventListener('click', () => {
         if (!stream) return;
         stream.getTracks().forEach(t => t.stop());
@@ -60,11 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
         cameraDiv.style.display = 'none';
     });
 
-    // 5) Съёмка и отправка изображения
     captureBtn.addEventListener('click', async () => {
         if (!stream) return;
 
-        // создаём canvas с тем же размером
         const w = video.videoWidth;
         const h = video.videoHeight;
         const canvas = document.createElement('canvas');
@@ -72,25 +66,16 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.height = h;
         const ctx = canvas.getContext('2d');
 
-        // рисуем фрейм из видео
         ctx.drawImage(video, 0, 0, w, h);
 
-        // (опционально) тут можно рисовать наклейки:
-        // const sticker = new Image();
-        // sticker.src = '/path/to/sticker.png';
-        // await sticker.decode();
-        // ctx.drawImage(sticker, x, y, sw, sh);
-
-        // получаем Blob в формате PNG (с альфа-каналом)
         canvas.toBlob(async blob => {
             const fd = new FormData();
             fd.append('image', blob, 'webcam.png');
             await uploadFormData(fd);
-            loadGallery();
+            await loadGallery();
         }, 'image/png');
     });
 
-    // вспомогательная функция отправки
     async function uploadFormData(fd) {
         try {
             const res = await fetch('/api/images/upload', {
@@ -99,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (!res.ok) throw new Error(res.status);
         } catch (e) {
-            alert('Ошибка загрузки: ' + e.message);
+            alert('Loading error: ' + e.message);
         }
     }
 });

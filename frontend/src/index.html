@@ -3,29 +3,35 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Camagru Gallery</title>
+    <title>Camagru</title>
+    <link rel="stylesheet" href="css/global.css" />
     <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 <header>
-    <h1>Camagru</h1>
-    <!-- Кнопки для загрузки и съёмки -->
-    <button id="uploadBtn">Upload Image</button>
-    <button id="startCamBtn">Use Webcam</button>
-    <input type="file" id="fileInput" accept="image/*" style="display:none" />
+    <div class="mainInfoWrapper">
+        <h1>Camagru</h1>
+        <button id="uploadBtn" class="imageButton">Upload Image</button>
+        <button id="startCamBtn" class="imageButton">Use Webcam</button>
+        <input type="file" id="fileInput" accept="image/*" class="hide" />
+    </div>
+    <div class="auth">
+        <a id="register" class="authLink green" href="/register">Register</a>
+        <a id="login" class="authLink green" href="/login">Login</a>
+        <a id="logout" class="authLink red" href="/logout">Logout</a>
+    </div>
 </header>
 
 <main>
-    <div id="gallery" class="gallery"></div>
-
-    <!-- Видео-превью и Canvas-слой -->
-    <div id="camera" style="display:none; text-align:center; margin-top:20px;">
-        <video id="video" playsinline autoplay style="width:320px; height:auto; border:1px solid #333;"></video>
+    <div id="camera" class="camera">
+        <video id="video" class="video" playsinline autoplay></video>
         <div>
             <button id="captureBtn">Capture</button>
             <button id="stopCamBtn">Stop Camera</button>
         </div>
     </div>
+
+    <div id="gallery" class="gallery"></div>
 </main>
 
 <footer>

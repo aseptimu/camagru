@@ -1,6 +1,7 @@
 <?php
 namespace Camagru\Service;
 
+use Camagru\Exception\DatabaseException;
 use Camagru\Exception\ValidationException;
 use Camagru\Repository\ImageRepository;
 use Camagru\Model\Image;
@@ -18,6 +19,10 @@ class ImageService
         $this->uploadDir = $uploadDir;
     }
 
+    /**
+     * @throws ValidationException
+     * @throws DatabaseException
+     */
     public function upload(): int
     {
         if (!isset($_FILES['image'])) {

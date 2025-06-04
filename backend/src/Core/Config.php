@@ -10,13 +10,16 @@ class Config
 
     public static function init(): void
     {
-        self::$env =         self::$env = [
+        self::$env = [
             'DB_HOST' => getenv('DB_HOST'),
             'DB_PORT' => getenv('DB_PORT'),
             'DB_NAME' => getenv('DB_NAME'),
             'DB_USER' => getenv('DB_USER'),
             'DB_PASSWORD' => getenv('DB_PASSWORD'),
             'UPLOAD_DIR' => getenv('UPLOAD_DIR'),
+            'EMAIL_FROM' => getenv('EMAIL_FROM'),
+            'EMAIL_FROM_NAME' => getenv('EMAIL_FROM_NAME'),
+            'EMAIL_REPLY_TO' => getenv('EMAIL_REPLY_TO'),
             'LOG_FILE' => getenv('LOG_FILE')
         ];
     }

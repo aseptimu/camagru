@@ -1,21 +1,32 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-}
-
-header {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 20px;
+main {
+    height: 70%;
+    overflow: scroll;
 }
 
 button {
-    padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
+}
+
+.mainInfoWrapper {
+    flex-grow: 2;
+}
+
+.auth {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.authLink {
+    border: 1px black;
+    padding: 5px;
+    color: black;
+    text-decoration: none;
+}
+
+.imageButton {
+    padding: 10px 20px;
 }
 
 main {
@@ -26,6 +37,7 @@ main {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 15px;
+    overflow: scroll;
 }
 
 .gallery img {
@@ -33,4 +45,33 @@ main {
     height: auto;
     border-radius: 8px;
     border: 1px solid #ddd;
+}
+
+.camera {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.video {
+    width: 320px;
+    height: auto;
+    border: 1px solid #333;
+}
+
+.error {
+    color: red;
+}
+
+.hide {
+    display: none;
+}
+
+.green {
+    background-color: green;
+}
+
+.red {
+    background-color: #bd5959;
 }
