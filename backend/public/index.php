@@ -14,6 +14,9 @@ $router->add('GET', '/images', [new ImageController(), 'list']);
 $router->add('POST', '/images/upload', [new ImageController(), 'upload']);
 //$router->add('GET', '/images/{id}', [new ImageController(), 'view']);
 $router->add('POST', '/register', [new AuthController(), 'register']);
+$router->add('POST', '/login', [new AuthController(), 'login']);
+$router->add('GET', '/status', [new AuthController(), 'status']);
+$router->add('POST', '/logout', [new AuthController(), 'logout']);
 $router->add('GET', '/confirm', [new AuthController(), 'confirm']);
 
 $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

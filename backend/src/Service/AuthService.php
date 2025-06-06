@@ -93,6 +93,39 @@ class AuthService
     }
 
     /**
+     * Authenticate user by username and password.
+     *
+     * @param string $username
+     * @param string $password
+     * @return User
+     * @throws ApiException
+     */
+    public function login(string $username, string $password): User
+    {
+        $username = trim($username);
+        $password = trim($password);
+
+        if ($username === '' || $password === '') {
+            throw new ApiException('Username and password are required', 400);
+        }
+
+        $user = $this->userRepo->findByUsername($username);
+        if ($user === null) {
+            throw new ApiException('Invalid username or password', 401);
+        }
+
+        if (!$user->isConfirmed()) {
+            throw new ApiException('Account not confirmed', 403);
+        }
+
+        if (!password_verify($password, $user->getPasswordHash())) {
+            throw new ApiException('Invalid username or password', 401);
+        }
+
+        return $user;
+    }
+
+    /**
      * Confirm account using token
      *
      * @throws ApiException
