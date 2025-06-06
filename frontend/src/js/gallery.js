@@ -1,4 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
+    (async function checkSession() {
+        try {
+            const res = await fetch('/api/status', {
+                credentials: 'same-origin'
+            });
+            const { authenticated } = await res.json();
+            document.getElementById('logout').classList.toggle('hide', !authenticated);
+            document.getElementById('login').classList.toggle('hide', authenticated);
+            document.getElementById('register').classList.toggle('hide', authenticated);
+        } catch (e) {
+            console.error('Status check failed:', e);
+        }
+    })();
+
+    const logoutLink = document.getElementById('logout');
+    logoutLink.addEventListener('click', async e => {
+        e.preventDefault();
+        try {
+            await fetch('/api/logout', {
+                method: 'POST',
+                credentials: 'same-origin'
+            });
+        } catch (err) {
+            console.error('Logout failed:', err);
+        }
+        window.location.href = '/';
+    });
+
     const gallery     = document.getElementById('gallery');
     const uploadBtn   = document.getElementById('uploadBtn');
     const fileInput   = document.getElementById('fileInput');
@@ -13,7 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadGallery() {
         gallery.innerHTML = 'Loading…';
         try {
-            const res = await fetch('/api/images');
+            const res = await fetch('/api/images', {
+                credentials: 'same-origin',
+            });
             if (!res.ok) throw new Error(res.status);
             const images = await res.json();
             gallery.innerHTML = '';
@@ -80,6 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch('/api/images/upload', {
                 method: 'POST',
+                credentials: 'same-origin',
                 body: fd
             });
             if (!res.ok) throw new Error(res.status);

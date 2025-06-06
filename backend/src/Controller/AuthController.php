@@ -27,7 +27,41 @@ class AuthController extends Controller
 
     public function login()
     {
+        try {
+            $username = $_POST['username'] ?? '';
+            $password = $_POST['password'] ?? '';
 
+            $user = $this->authService->login($username, $password);
+
+            if (session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            $_SESSION['user_id'] = $user->getId();
+            $_SESSION['username'] = $user->getUsername();
+            $_SESSION['email'] = $user->getEmail();
+
+            $this->json([
+                'status' => 'success',
+                'message' => 'Logged in successfully.',
+                'user' => [
+                    'id' => $user->getId(),
+                    'username' => $user->getUsername(),
+                    'email' => $user->getEmail(),
+                ]
+            ]);
+        } catch (ApiException $e) {
+            $this->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], $e->getStatusCode());
+        } catch (Exception $e) {
+            Logger::error($e->getMessage());
+            $this->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -37,9 +71,9 @@ class AuthController extends Controller
     public function register()
     {
         try {
-            $username = $_POST['username'];
-            $email = $_POST['email'];
-            $password = $_POST['password'];
+            $username = $_POST['username'] ?? '';
+            $email = $_POST['email'] ?? '';
+            $password = $_POST['password'] ?? '';
 
             $confirmUrl = $this->authService->register($username, $email, $password);
             $this->json($confirmUrl, 201);
@@ -55,6 +89,26 @@ class AuthController extends Controller
                 'status' => 'error',
                 'message' => 'Internal Server Error',
             ], 500);
+        }
+    }
+
+    public function status()
+    {
+        session_start();
+
+        if (!empty($_SESSION['user_id'])) {
+            $this->json([
+                'authenticated' => true,
+                'user' => [
+                    'id' => $_SESSION['user_id'],
+                    'username' => $_SESSION['username'],
+                    'email' => $_SESSION['email'],
+                ]
+            ]);
+        } else {
+            $this->json([
+                'authenticated' => false
+            ]);
         }
     }
 
@@ -81,8 +135,30 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * POST /api/logout
+     */
     public function logout()
     {
+        try {
+            if (session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
 
+            $_SESSION = [];
+            setcookie(session_name(), '', time() - 3600, '/');
+            session_destroy();
+
+            $this->json([
+                'status' => 'success',
+                'message' => 'Logged out successfully.',
+            ]);
+        } catch (Exception $e) {
+            Logger::error($e->getMessage());
+            $this->json([
+                'status' => 'error',
+                'message' => 'Internal Server Error',
+            ], 500);
+        }
     }
 }
