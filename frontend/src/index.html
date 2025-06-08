@@ -15,11 +15,13 @@
         <button id="startCamBtn" class="imageButton">Use Webcam</button>
         <input type="file" id="fileInput" accept="image/*" class="hide" />
     </div>
-    <div class="auth">
-        <a id="register" class="authLink green" href="/register">Register</a>
-        <a id="login" class="authLink green" href="/login">Login</a>
-        <a id="logout" class="authLink red" href="#">Logout</a>
-    </div>
+    <nav class="auth">
+        <a id="linkRegister" class="authLink green hide" href="/register">Register</a>
+        <a id="linkLogin"    class="authLink green hide" href="/login">Login</a>
+        <a id="linkUpdate"   class="authLink green hide" href="/updateProfile">Update Profile</a>
+        <a id="linkLogout"   class="authLink red   hide" href="#">Logout</a>
+        <span id="userName" class="user-name hide"></span>
+    </nav>
 </header>
 
 <main>
@@ -38,6 +40,7 @@
     <p>&copy; 2025 Camagru by aseptimu</p>
 </footer>
 
+<script src="js/header.js" defer></script>
 <script src="js/gallery.js"></script>
 </body>
 </html>

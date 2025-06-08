@@ -25,7 +25,7 @@ class AuthController extends Controller
         $this->authService = new AuthService($pdo, $emailService);
     }
 
-    public function login()
+    public function login(): void
     {
         try {
             $username = $_POST['username'] ?? '';
@@ -68,7 +68,7 @@ class AuthController extends Controller
      * POST /register
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         try {
             $username = $_POST['username'] ?? '';
@@ -92,7 +92,7 @@ class AuthController extends Controller
         }
     }
 
-    public function status()
+    public function status(): void
     {
         session_start();
 
@@ -112,7 +112,7 @@ class AuthController extends Controller
         }
     }
 
-    public function confirm()
+    public function confirm(): void
     {
         try {
             $token = $_GET['token'] ?? '';
@@ -138,7 +138,7 @@ class AuthController extends Controller
     /**
      * POST /api/logout
      */
-    public function logout()
+    public function logout(): void
     {
         try {
             if (session_status() == PHP_SESSION_NONE) {
@@ -158,6 +158,103 @@ class AuthController extends Controller
             $this->json([
                 'status' => 'error',
                 'message' => 'Internal Server Error',
+            ], 500);
+        }
+    }
+
+    public function updateProfile(): void
+    {
+        try {
+            if (session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            $userId = $_SESSION['user_id'] ?? null;
+            if ($userId === null) {
+                throw new ApiException('Not authenticated', 400);
+            }
+
+            $newUsername = $_POST['username'] ?? null;
+            $newEmail = $_POST['email'] ?? null;
+            $newPassword = $_POST['password'] ?? null;
+
+            $this->authService->updateProfile($userId, $newUsername, $newEmail, $newPassword);
+            if ($newUsername !== null) {
+                $_SESSION['username'] = $newUsername;
+            }
+            if ($newEmail !== null) {
+                $_SESSION['email'] = $newEmail;
+            }
+            $this->json([
+                'status' => 'success',
+                'message' => 'profile updated successfully.',
+            ]);
+        } catch (ApiException $e) {
+            $this->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ]);
+        } catch (Exception $e) {
+            Logger::error($e->getMessage());
+            $this->json([
+                'status' => 'error',
+                'message' => 'Internal Server Error',
+            ]);
+        }
+    }
+
+    /**
+     * POST /api/recover
+     * body: { email }
+     */
+    public function recover(): void
+    {
+        try {
+            $email = $_POST['email'] ?? '';
+            $this->authService->requestPasswordReset($email);
+            $this->json([
+                'status'  => 'success',
+                'message' => 'Password reset link sent if email exists.'
+            ]);
+        } catch (ApiException $e) {
+            $code = $e->getStatusCode();
+            $this->json([
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ], $code);
+        } catch (Exception $e) {
+            Logger::error($e->getMessage());
+            $this->json([
+                'status'  => 'error',
+                'message' => 'Internal Server Error'
+            ], 500);
+        }
+    }
+
+    /**
+     * POST /api/reset
+     * body: { token, password }
+     */
+    public function reset(): void
+    {
+        try {
+            $token       = $_POST['token']    ?? '';
+            $newPassword = $_POST['password'] ?? '';
+            $this->authService->resetPassword($token, $newPassword);
+            $this->json([
+                'status'  => 'success',
+                'message' => 'Password has been reset.'
+            ]);
+        } catch (ApiException $e) {
+            $this->json([
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ], $e->getStatusCode());
+        } catch (Exception $e) {
+            Logger::error($e->getMessage());
+            $this->json([
+                'status'  => 'error',
+                'message' => 'Internal Server Error'
             ], 500);
         }
     }

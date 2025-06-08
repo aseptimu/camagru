@@ -19,6 +19,11 @@ class UserRepository
         RETURNING id, created_at;
     ';
 
+    private const FIND_BY_ID_QUERY = '
+        SELECT id, username, email, password_hash, is_confirmed, confirmation_token, created_at
+        FROM users
+        WHERE id = :id;
+    ';
     private const FIND_BY_EMAIL_QUERY = '
         SELECT id, username, email, password_hash, is_confirmed, confirmation_token, created_at
         FROM users
@@ -49,6 +54,34 @@ class UserRepository
         SET username = :username,
             email = :email,
             password_hash = :hash
+        WHERE id = :id
+    ';
+
+    private const SET_RESET_TOKEN_QUERY = '
+        UPDATE users
+        SET reset_token = :token,
+            reset_token_expires = NOW() + INTERVAL \'1 hour\'
+        WHERE email = :email
+    ';
+
+    private const FIND_BY_RESET_TOKEN_QUERY = '
+        SELECT id, username, email, password_hash, is_confirmed, confirmation_token, created_at
+        FROM users
+        WHERE reset_token = :token
+          AND reset_token_expires > NOW()
+        LIMIT 1
+    ';
+
+    private const CLEAR_RESET_TOKEN_QUERY = '
+        UPDATE users
+        SET reset_token = NULL,
+            reset_token_expires = NULL
+        WHERE id = :id
+    ';
+
+    private const UPDATE_PASSWORD_QUERY = '
+        UPDATE users
+        SET password_hash = :hash
         WHERE id = :id
     ';
 
@@ -84,6 +117,20 @@ class UserRepository
             Logger::error($e->getMessage() . $user);
             throw new ApiException('Failed to create user');
         }
+    }
+
+    /**
+     * Find user by id
+     *
+     * @param int $id user id
+     * @return ?User
+     */
+    public function findById(int $id): ?User
+    {
+        $stmt = $this->pdo->prepare(self::FIND_BY_ID_QUERY);
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ? $this->mapRowToUser($row) : null;
     }
 
     /**
@@ -176,6 +223,68 @@ class UserRepository
         } catch (PDOException $e) {
             Logger::error($e->getMessage());
             throw new ApiException('Failed to update profile');
+        }
+    }
+
+    /**
+     * Save reset_token and expiration date (NOW()+1h) for user by email.
+     * @throws ApiException
+     */
+    public function setResetTokenByEmail(string $email, string $token): void
+    {
+        try {
+            $stmt = $this->pdo->prepare(self::SET_RESET_TOKEN_QUERY);
+            $stmt->execute([
+                ':email' => $email,
+                ':token' => $token,
+            ]);
+            if ($stmt->rowCount() === 0) {
+                throw new ApiException('Email not found', 404);
+            }
+        } catch (PDOException $e) {
+            Logger::error($e->getMessage());
+            throw new ApiException('Failed to set reset token', 500);
+        }
+    }
+
+    /**
+     * Find user by reset_token (and checks expiry).
+     */
+    public function findByResetToken(string $token): ?User
+    {
+        $stmt = $this->pdo->prepare(self::FIND_BY_RESET_TOKEN_QUERY);
+        $stmt->execute([':token' => $token]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ? $this->mapRowToUser($row) : null;
+    }
+
+    /**
+     * Clear fields reset_token and reset_token_expires.
+     */
+    public function clearResetToken(int $userId): void
+    {
+        try {
+            $stmt = $this->pdo->prepare(self::CLEAR_RESET_TOKEN_QUERY);
+            $stmt->execute([':id' => $userId]);
+        } catch (PDOException $e) {
+            Logger::error($e->getMessage());
+        }
+    }
+
+    /**
+     * Updates user password.
+     */
+    public function updatePassword(int $userId, string $newHash): void
+    {
+        try {
+            $stmt = $this->pdo->prepare(self::UPDATE_PASSWORD_QUERY);
+            $stmt->execute([
+                ':id'   => $userId,
+                ':hash' => $newHash,
+            ]);
+        } catch (PDOException $e) {
+            Logger::error($e->getMessage());
+            throw new ApiException('Failed to update password', 500);
         }
     }
 

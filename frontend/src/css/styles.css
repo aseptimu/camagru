@@ -47,6 +47,13 @@ main {
     border: 1px solid #ddd;
 }
 
+.userName {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+    color: #555;
+}
+
 .camera {
     display: none;
     text-align: center;

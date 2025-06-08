@@ -18,6 +18,9 @@ $router->add('POST', '/login', [new AuthController(), 'login']);
 $router->add('GET', '/status', [new AuthController(), 'status']);
 $router->add('POST', '/logout', [new AuthController(), 'logout']);
 $router->add('GET', '/confirm', [new AuthController(), 'confirm']);
+$router->add('POST', '/updateProfile', [new AuthController(), 'updateProfile']);
+$router->add('POST', '/recover', [new AuthController(), 'recover']);
+$router->add('POST', '/reset', [new AuthController(), 'reset']);
 
 $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
