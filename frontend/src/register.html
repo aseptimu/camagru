@@ -6,10 +6,13 @@
     <title>Camagru – Register</title>
     <link rel="stylesheet" href="css/global.css" />
     <link rel="stylesheet" href="css/auth.css" />
+    <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 <header>
-    <h1><a href="/" class="logo-link">Camagru</a></h1>
+    <div class="mainInfoWrapper">
+        <h1><a href="/" class="logo-link">Camagru</a></h1>
+    </div>
 </header>
 
 <main>
@@ -54,6 +57,10 @@
             />
 
             <button type="submit" class="submit-btn">Register</button>
+            <p class="form-footer">
+                <a href="/login">Login</a> |
+                <a href="/recover">Forgot password?</a>
+            </p>
             <p id="authError" class="error"></p>
         </form>
     </div>
@@ -64,5 +71,6 @@
 </footer>
 
 <script src="js/register.js"></script>
+<script src="js/header.js" defer></script>
 </body>
 </html>

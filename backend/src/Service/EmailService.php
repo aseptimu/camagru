@@ -67,4 +67,27 @@ class EmailService
         . "Best regards,\r\nCamagru Team";
         $this->send($to, $subject, $body);
     }
+
+    /**
+     * Sends a password reset email with a reset link valid for 1 hour.
+     *
+     * @param string $to        Recipient's email address
+     * @param string $username  Recipient's username
+     * @param string $resetUrl  URL to reset the password
+     *
+     * @throws ApiException if sending fails
+     */
+    public function sendPasswordReset(string $to, string $username, string $resetUrl): void
+    {
+        $subject = 'Password Reset Request for Camagru';
+        $body    = "Hello, {$username}!\r\n\r\n"
+            . "We received a request to reset your password for your Camagru account.\r\n"
+            . "To choose a new password, please click the link below (the link will expire in 1 hour):\r\n\r\n"
+            . "{$resetUrl}\r\n\r\n"
+            . "If you did not request a password reset, please ignore this email.\r\n\r\n"
+            . "Best regards,\r\n"
+            . "The Camagru Team";
+
+        $this->send($to, $subject, $body);
+    }
 }

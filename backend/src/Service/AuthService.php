@@ -75,7 +75,7 @@ class AuthService
                 date('Y-m-d H:i:s')
             );
 
-            $result = $this->userRepo->create($user);
+            $this->userRepo->create($user);
             $confirmUrl = $this->getBaseUrl() . '/confirm?token=' . $token;
             $this->emailService->sendConfirmation($email, $username, $confirmUrl);
 
@@ -145,6 +145,116 @@ class AuthService
         }
 
         $this->userRepo->confirmUser($user->getId());
+    }
+
+    /**
+     * Update user details
+     * @param int $userId
+     * @param string|null $newUsername
+     * @param string|null $newEmail
+     * @param string|null $newPassword
+     * @return void
+     * @throws ApiException
+     */
+    public function updateProfile(int $userId, ?string $newUsername, ?string $newEmail, ?string $newPassword)
+    {
+        $user = $this->userRepo->findById($userId);
+        if ($user === null) {
+            throw new ApiException('User not found', 404);
+        }
+
+        if ($newUsername !== null) {
+            $newUsername = trim($newUsername);
+            if (mb_strlen($newUsername) < 3) {
+                throw new ApiException('Username must be at least 3 characters', 400);
+            }
+            $exists = $this->userRepo->findByUsername($newUsername);
+            if ($exists !== null && $exists->getId() !== $userId) {
+                throw new ApiException('Username already taken', 409);
+            }
+            $user->setUsername($newUsername);
+        }
+
+        if ($newEmail !== null) {
+            $newEmail = trim($newEmail);
+            if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
+                throw new ApiException('Invalid email format', 400);
+            }
+            $exists = $this->userRepo->findByEmail($newEmail);
+            if ($exists !== null && $exists->getId() !== $userId) {
+                throw new ApiException('Email already in use', 409);
+            }
+            $user->setEmail($newEmail);
+        }
+
+        if ($newPassword !== null) {
+            if (mb_strlen($newPassword) < 6) {
+                throw new ApiException('Password must be at least 6 characters', 400);
+            }
+            $user->setPasswordHash(password_hash($newPassword, PASSWORD_DEFAULT));
+        }
+
+        $this->userRepo->updateProfile($user);
+    }
+
+    /**
+     * Generates reset token and sends email.
+     *
+     * @param string $email
+     * @throws ApiException
+     */
+    public function requestPasswordReset(string $email): void
+    {
+        $email = trim($email);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new ApiException('Invalid email', 400);
+        }
+
+        try {
+            $token = bin2hex(random_bytes(16));
+        } catch (Exception $e) {
+            Logger::error($e->getMessage());
+            throw new ApiException('Could not generate reset token', 500);
+        }
+
+        $this->userRepo->setResetTokenByEmail($email, $token);
+
+        $user = $this->userRepo->findByEmail($email);
+        if ($user === null) {
+            throw new ApiException('Email not found', 404);
+        }
+
+        $resetUrl = $this->getBaseUrl() . '/reset?token=' . $token;
+
+        $this->emailService->sendPasswordReset($email, $user->getUsername(), $resetUrl);
+    }
+
+    /**
+     * Resets password: check token, updates password and clear token.
+     *
+     * @param string $token
+     * @param string $newPassword
+     * @throws ApiException
+     */
+    public function resetPassword(string $token, string $newPassword): void
+    {
+        $token = trim($token);
+        if ($token === '') {
+            throw new ApiException('Token is required', 400);
+        }
+        if (mb_strlen($newPassword) < 6) {
+            throw new ApiException('Password must be at least 6 characters', 400);
+        }
+
+        $user = $this->userRepo->findByResetToken($token);
+        if ($user === null) {
+            throw new ApiException('Invalid or expired token', 400);
+        }
+
+        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $this->userRepo->updatePassword($user->getId(), $hash);
+
+        $this->userRepo->clearResetToken($user->getId());
     }
 
     private function getBaseUrl(): string

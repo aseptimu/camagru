@@ -1,4 +1,3 @@
-// js/register.js
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('authForm');
@@ -9,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         errorP.textContent = '';
 
-        // Disable button to prevent double‐click
         submitBtn.disabled = true;
         submitBtn.textContent = 'Please wait…';
 
@@ -18,15 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = form.password.value;
         const confirmPassword = form.confirmPassword.value;
 
-        // Validation
         if (username.length < 3) {
             errorP.textContent = 'Username must be at least 3 characters.';
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Register';
-            return;
-        }
-        if (!email.includes('@') || email.length < 5) {
-            errorP.textContent = 'Enter a valid email address.';
             submitBtn.disabled = false;
             submitBtn.textContent = 'Register';
             return;

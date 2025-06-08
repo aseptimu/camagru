@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Camagru – Login</title>
-    <link rel="stylesheet" href="css/global.css" />
-    <link rel="stylesheet" href="css/auth.css" />
+    <link rel="stylesheet" href="css/global.css"/>
+    <link rel="stylesheet" href="css/auth.css"/>
+    <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 <header>
-    <h1><a href="/" class="logo-link">Camagru</a></h1>
+    <div class="mainInfoWrapper">
+        <h1><a href="/" class="logo-link">Camagru</a></h1>
+    </div>
 </header>
 
 <main>
@@ -36,6 +39,10 @@
             />
 
             <button type="submit" class="submit-btn">Login</button>
+            <p class="form-footer">
+                <a href="/register">Register</a> |
+                <a href="/recover">Forgot password?</a>
+            </p>
             <p id="authError" class="error"></p>
         </form>
     </div>
@@ -46,5 +53,6 @@
 </footer>
 
 <script src="js/login.js"></script>
+<script src="js/header.js" defer></script>
 </body>
 </html>

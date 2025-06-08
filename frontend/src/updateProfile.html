@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Camagru – Update Profile</title>
+    <link rel="stylesheet" href="css/global.css"/>
+    <link rel="stylesheet" href="css/auth.css"/>
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<header>
+    <div class="mainInfoWrapper">
+        <h1><a href="/" class="logo-link">Camagru</a></h1>
+    </div>
+    <nav class="auth">
+        <a id="linkRegister" class="authLink green hide" href="/register">Register</a>
+        <a id="linkLogin"    class="authLink green hide" href="/login">Login</a>
+        <a id="linkUpdate"   class="authLink green hide" href="/updateProfile">Update Profile</a>
+        <a id="linkLogout"   class="authLink red   hide" href="#">Logout</a>
+    </nav>
+</header>
+
+<main>
+    <div class="form-wrapper">
+        <form id="profileForm" class="auth-form" action="/api/updateProfile" method="post">
+            <h2>Update Profile</h2>
+
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username"/>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email"/>
+
+            <label for="password">New Password (leave blank to keep)</label>
+            <input type="password" id="password" name="password"/>
+
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword"/>
+
+            <button type="submit" class="submit-btn">Save Changes</button>
+            <p id="profileError" class="error"></p>
+        </form>
+    </div>
+</main>
+
+<footer>
+    <p>&copy; 2025 Camagru by aseptimu</p>
+</footer>
+
+<script src="js/header.js" defer></script>
+<script src="js/profile.js"></script>
+</body>
+</html>

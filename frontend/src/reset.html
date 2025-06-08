@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <title>Camagru – Password Reset</title>
+    <link rel="stylesheet" href="css/global.css"/>
+    <link rel="stylesheet" href="css/auth.css"/>
+    <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body>
+<header>
+    <div class="mainInfoWrapper">
+        <h1><a href="/" class="logo-link">Camagru</a></h1>
+    </div>
+    <nav class="auth">
+        <a id="linkRegister" class="authLink green hide" href="/register">Register</a>
+        <a id="linkLogin"    class="authLink green hide" href="/login">Login</a>
+        <a id="linkUpdate"   class="authLink green hide" href="/updateProfile">Update Profile</a>
+        <a id="linkLogout"   class="authLink red   hide" href="#">Logout</a>
+        <span id="userName"  class="user-name hide"></span>
+    </nav>
+</header>
+
+<main>
+    <div class="form-wrapper">
+        <form id="resetForm" class="auth-form">
+            <h2>Reset Your Password</h2>
+
+            <input type="hidden" id="token" name="token"/>
+
+            <label for="password">New Password</label>
+            <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="At least 6 characters"
+                    required
+                    minlength="6"
+            />
+
+            <label for="confirmPassword">Confirm New Password</label>
+            <input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    placeholder="Repeat your password"
+                    required
+                    minlength="6"
+            />
+
+            <button type="submit" class="submit-btn">Save</button>
+            <p id="resetError" class="error"></p>
+        </form>
+    </div>
+</main>
+
+<footer>
+    <p>&copy; 2025 Camagru by aseptimu</p>
+</footer>
+
+<script src="js/header.js" defer></script>
+<script src="js/reset.js" defer></script>
+</body>
+</html>

@@ -10,8 +10,13 @@
 <body>
 <header>
     <h1><a href="/" class="logo-link">Camagru</a></h1>
+    <nav class="auth">
+        <a id="linkRegister" class="authLink green hide" href="/register">Register</a>
+        <a id="linkLogin"    class="authLink green hide" href="/login">Login</a>
+        <a id="linkUpdate"   class="authLink green hide" href="/updateProfile">Update Profile</a>
+        <a id="linkLogout"   class="authLink red   hide" href="#">Logout</a>
+    </nav>
 </header>
-
 <main>
     <div class="form-wrapper">
         <div id="confirmMessage" class="auth-form">
@@ -25,5 +30,6 @@
 </footer>
 
 <script src="js/confirm.js"></script>
+<script src="js/header.js" defer></script>
 </body>
 </html>
