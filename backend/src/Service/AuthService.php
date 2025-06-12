@@ -1,4 +1,5 @@
 <?php
+
 namespace Camagru\Service;
 
 use Camagru\Exception\ApiException;
@@ -72,7 +73,8 @@ class AuthService
                 $passwordHash,
                 false,
                 $token,
-                date('Y-m-d H:i:s')
+                date('Y-m-d H:i:s'),
+                true
             );
 
             $this->userRepo->create($user);
@@ -156,7 +158,13 @@ class AuthService
      * @return void
      * @throws ApiException
      */
-    public function updateProfile(int $userId, ?string $newUsername, ?string $newEmail, ?string $newPassword)
+    public function updateProfile(
+        int     $userId,
+        ?string $newUsername,
+        ?string $newEmail,
+        ?string $newPassword,
+        ?bool   $notifyOnComment
+    ): void
     {
         $user = $this->userRepo->findById($userId);
         if ($user === null) {
@@ -193,6 +201,11 @@ class AuthService
             }
             $user->setPasswordHash(password_hash($newPassword, PASSWORD_DEFAULT));
         }
+
+        if ($notifyOnComment !== null) {
+            $user->setNotifyOnComment($notifyOnComment);
+        }
+
 
         $this->userRepo->updateProfile($user);
     }

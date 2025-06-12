@@ -1,7 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const form      = document.getElementById('profileForm');
-    const errorP    = document.getElementById('profileError');
-    const submitBtn = form.querySelector('button[type="submit"]');
+    const form         = document.getElementById('profileForm');
+    const errorP       = document.getElementById('profileError');
+    const submitBtn    = form.querySelector('button[type="submit"]');
+    const notifyCheck  = document.getElementById('notifyCheckbox');
+
+    (async function loadProfile() {
+        try {
+            const res = await fetch('api/status', {
+                credentials: 'same-origin'
+            });
+            if (!res.ok) throw new Error();
+            const { user } = await res.json();
+            form.username.value = user.username;
+            form.email.value    = user.email;
+            if (user.notifyOnComment !== undefined) {
+                notifyCheck.checked = !!user.notifyOnComment;
+            }
+        } catch {
+            window.location.href = '/login';
+        }
+    })();
 
     form.addEventListener('submit', async e => {
         e.preventDefault();
@@ -14,33 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const updates = {};
 
-        if (username) {
-            if (username.length < 3) {
-                errorP.textContent = 'Username must be at least 3 characters.';
-                form.username.focus();
-                return;
-            }
-            updates.username = username;
-        }
 
-        if (email) {
-            updates.email = email;
-        }
-
-        if (pass || confirm) {
-            if (pass.length < 6) {
-                errorP.textContent = 'Password must be at least 6 characters.';
-                form.password.focus();
-                return;
-            }
-            if (pass !== confirm) {
-                errorP.textContent = 'Passwords do not match.';
-                form.confirmPassword.focus();
-                return;
-            }
-            updates.password = pass;
-            updates.confirmPassword = confirm;
-        }
+        updates.notifyOnComment = notifyCheck.checked ? '1' : '0';
 
         if (Object.keys(updates).length === 0) {
             errorP.textContent = 'Change at least one field for update.';

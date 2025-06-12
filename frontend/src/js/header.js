@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             username = json.user?.username || '';
         }
     } catch (err) {
-        console.error('Не удалось получить статус сессии', err);
+        console.error('Failed to fetch session status', err);
     }
 
     const p = window.location.pathname.toLowerCase();

@@ -90,4 +90,26 @@ class EmailService
 
         $this->send($to, $subject, $body);
     }
+
+    /**
+     * Send notification about new comment
+     *
+     * @param string $to
+     * @param string $username
+     * @param string $comment
+     * @param string $imageUrl
+     * @return void
+     * @throws ApiException
+     */
+    public function sendCommentNotification(string $to, string $username, string $comment, string $imageUrl): void
+    {
+        $subject = 'New comment on your Camagru image';
+        $body    = "Hello, {$username}!\r\n\r\n"
+            . "Someone left a comment on your image:\r\n\r\n"
+            . "\"{$comment}\"\r\n\r\n"
+            . "See it here: {$imageUrl}\r\n\r\n"
+            . "Best,\r\nCamagru Team";
+        $this->send($to, $subject, $body);
+    }
+
 }

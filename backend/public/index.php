@@ -11,8 +11,14 @@ Config::init();
 $router = new Router();
 
 $router->add('GET', '/images', [new ImageController(), 'list']);
+$router->add('GET', '/images/feed', [new ImageController(), 'feed']);
 $router->add('POST', '/images/upload', [new ImageController(), 'upload']);
-//$router->add('GET', '/images/{id}', [new ImageController(), 'view']);
+$router->add('POST', '/images/{id}/like', [new ImageController(), 'like']);
+$router->add('POST', '/images/{id}/unlike', [new ImageController(), 'unlike']);
+$router->add('POST', '/images/{id}/comments', [new ImageController(), 'addComment']);
+$router->add('GET', '/images/{id}/comments', [new ImageController(), 'getComments']);
+$router->add('GET', '/images/user/{userId}', [new ImageController(), 'listByUser']);
+
 $router->add('POST', '/register', [new AuthController(), 'register']);
 $router->add('POST', '/login', [new AuthController(), 'login']);
 $router->add('GET', '/status', [new AuthController(), 'status']);

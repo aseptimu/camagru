@@ -14,30 +14,30 @@ class UserRepository
     private PDO $pdo;
 
     private const CREATE_USER_QUERY = '
-        INSERT INTO users (username, email, password_hash, is_confirmed, confirmation_token)
-        VALUES (:username, :email, :hash, :confirmed, :token)
+        INSERT INTO users (username, email, password_hash, is_confirmed, confirmation_token, notify_on_comment)
+        VALUES (:username, :email, :hash, :confirmed, :token, :notify)
         RETURNING id, created_at;
     ';
 
     private const FIND_BY_ID_QUERY = '
-        SELECT id, username, email, password_hash, is_confirmed, confirmation_token, created_at
+        SELECT id, username, email, password_hash, is_confirmed, confirmation_token, created_at, notify_on_comment
         FROM users
         WHERE id = :id;
     ';
     private const FIND_BY_EMAIL_QUERY = '
-        SELECT id, username, email, password_hash, is_confirmed, confirmation_token, created_at
+        SELECT id, username, email, password_hash, is_confirmed, confirmation_token, created_at, notify_on_comment
         FROM users
         WHERE email = :email;
     ';
 
     private const FIND_BY_USERNAME_QUERY = '
-        SELECT id, username, email, password_hash, is_confirmed, confirmation_token, created_at
+        SELECT id, username, email, password_hash, is_confirmed, confirmation_token, created_at, notify_on_comment
         FROM users
         WHERE username = :username;
     ';
 
     private const FIND_BY_TOKEN_QUERY = '
-        SELECT id, username, email, password_hash, is_confirmed, confirmation_token, created_at
+        SELECT id, username, email, password_hash, is_confirmed, confirmation_token, created_at, notify_on_comment
         FROM users
         WHERE confirmation_token = :token;
     ';
@@ -53,7 +53,8 @@ class UserRepository
         UPDATE users
         SET username = :username,
             email = :email,
-            password_hash = :hash
+            password_hash = :hash,
+            notify_on_comment = :notify
         WHERE id = :id
     ';
 
@@ -65,7 +66,7 @@ class UserRepository
     ';
 
     private const FIND_BY_RESET_TOKEN_QUERY = '
-        SELECT id, username, email, password_hash, is_confirmed, confirmation_token, created_at
+        SELECT id, username, email, password_hash, is_confirmed, confirmation_token, created_at, notify_on_comment
         FROM users
         WHERE reset_token = :token
           AND reset_token_expires > NOW()
@@ -106,6 +107,7 @@ class UserRepository
                 ':hash' => $user->getPasswordHash(),
                 ':confirmed' => $user->isConfirmed() ? 1 : 0,
                 ':token' => $user->getConfirmationToken(),
+                ':notify'    => $user->isNotifyOnComment() ? 1 : 0
             ]);
 
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -218,6 +220,7 @@ class UserRepository
                 ':username' => $user->getUsername(),
                 ':email'    => $user->getEmail(),
                 ':hash'     => $user->getPasswordHash(),
+                ':notify'     => $user->isNotifyOnComment() ? 1 : 0,
                 ':id'       => $user->getId(),
             ]);
         } catch (PDOException $e) {
@@ -298,6 +301,7 @@ class UserRepository
             $row['is_confirmed'],
             $row['confirmation_token'],
             $row['created_at'],
+            $row['notify_on_comment'],
         );
     }
 }

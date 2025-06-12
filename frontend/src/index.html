@@ -11,9 +11,7 @@
 <header>
     <div class="mainInfoWrapper">
         <h1>Camagru</h1>
-        <button id="uploadBtn" class="imageButton">Upload Image</button>
-        <button id="startCamBtn" class="imageButton">Use Webcam</button>
-        <input type="file" id="fileInput" accept="image/*" class="hide" />
+        <a href="/editing" class="imageButton">Go to Editing Page</a>
     </div>
     <nav class="auth">
         <a id="linkRegister" class="authLink green hide" href="/register">Register</a>
@@ -25,15 +23,13 @@
 </header>
 
 <main>
-    <div id="camera" class="camera">
-        <video id="video" class="video" playsinline autoplay></video>
-        <div>
-            <button id="captureBtn">Capture</button>
-            <button id="stopCamBtn">Stop Camera</button>
-        </div>
-    </div>
-
     <div id="gallery" class="gallery"></div>
+
+    <nav id="pagination" class="pagination">
+        <button id="prevPage" class="page-btn" disabled>‹ Prev</button>
+        <span id="pageInfo">Page 1</span>
+        <button id="nextPage" class="page-btn" disabled>Next ›</button>
+    </nav>
 </main>
 
 <footer>

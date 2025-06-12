@@ -40,6 +40,7 @@ class AuthController extends Controller
             $_SESSION['user_id'] = $user->getId();
             $_SESSION['username'] = $user->getUsername();
             $_SESSION['email'] = $user->getEmail();
+            $_SESSION['notifyOnComment'] = $user->isNotifyOnComment();
 
             $this->json([
                 'status' => 'success',
@@ -103,6 +104,7 @@ class AuthController extends Controller
                     'id' => $_SESSION['user_id'],
                     'username' => $_SESSION['username'],
                     'email' => $_SESSION['email'],
+                    'notifyOnComment' => $_SESSION['notifyOnComment'],
                 ]
             ]);
         } else {
@@ -177,13 +179,21 @@ class AuthController extends Controller
             $newUsername = $_POST['username'] ?? null;
             $newEmail = $_POST['email'] ?? null;
             $newPassword = $_POST['password'] ?? null;
+            $notifyFlagRaw      = $_POST['notifyOnComment']  ?? null;
+            $notifyOnComment    = null;
+            if ($notifyFlagRaw !== null) {
+                $notifyOnComment = ($notifyFlagRaw === '1' || $notifyFlagRaw === 'true');
+            }
 
-            $this->authService->updateProfile($userId, $newUsername, $newEmail, $newPassword);
+            $this->authService->updateProfile($userId, $newUsername, $newEmail, $newPassword, $notifyOnComment);
             if ($newUsername !== null) {
                 $_SESSION['username'] = $newUsername;
             }
             if ($newEmail !== null) {
                 $_SESSION['email'] = $newEmail;
+            }
+            if ($notifyOnComment !== null) {
+                $_SESSION['notifyOnComment'] = $notifyOnComment;
             }
             $this->json([
                 'status' => 'success',

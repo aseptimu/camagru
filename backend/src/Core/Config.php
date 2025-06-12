@@ -38,6 +38,12 @@ class Config
     {
         $rel = self::get('UPLOAD_DIR', 'public/uploads');
         return rtrim(self::projectRoot() . DIRECTORY_SEPARATOR . $rel, '/');
-    } 
+    }
+
+    public static function overlayDir(): string
+    {
+        $rel = 'public/overlays';
+        return rtrim(self::projectRoot() . DIRECTORY_SEPARATOR . $rel, '/');
+    }
 
 }
