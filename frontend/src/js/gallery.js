@@ -1,93 +1,180 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const gallery     = document.getElementById('gallery');
-    const uploadBtn   = document.getElementById('uploadBtn');
-    const fileInput   = document.getElementById('fileInput');
-    const startCamBtn = document.getElementById('startCamBtn');
-    const stopCamBtn  = document.getElementById('stopCamBtn');
-    const captureBtn  = document.getElementById('captureBtn');
-    const cameraDiv   = document.getElementById('camera');
-    const video       = document.getElementById('video');
+    const gallery = document.getElementById('gallery');
+    const pagination = {
+        prevBtn: document.getElementById('prevPage'),
+        nextBtn: document.getElementById('nextPage'),
+        info: document.getElementById('pageInfo')
+    };
+    let currentPage = 1, totalPages = 1;
+    let authenticated = false;
+    let userId = null;
 
-    let stream = null;
-
-    async function loadGallery() {
-        gallery.innerHTML = 'Loading…';
+    async function checkAuth() {
         try {
-            const res = await fetch('/api/images', {
-                credentials: 'same-origin',
-            });
-            if (!res.ok) throw new Error(res.status);
-            const images = await res.json();
-            gallery.innerHTML = '';
-            images.forEach(meta => {
-                const img = document.createElement('img');
-                img.src = `/uploads/${meta.filename}`;
-                img.alt = meta.original_name;
-                gallery.appendChild(img);
-            });
-        } catch (e) {
-            gallery.innerHTML = `<p class="error">Ошибка: ${e.message}</p>`;
+            const res = await fetch('/api/status', {credentials: 'same-origin'});
+            if (!res.ok) return;
+            const json = await res.json();
+            authenticated = json.authenticated;
+            if (authenticated && json.user?.id) {
+                userId = json.user.id;
+            }
+        } catch (err) {
+            console.warn('Auth check failed', err);
         }
     }
-    loadGallery();
 
-    uploadBtn.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', async () => {
-        if (!fileInput.files.length) return;
-        const fd = new FormData();
-        fd.append('image', fileInput.files[0]);
-        await uploadFormData(fd);
-        await loadGallery();
-    });
+    async function loadGallery(page = 1) {
+        gallery.innerHTML = 'Loading…';
 
-    startCamBtn.addEventListener('click', async () => {
-        cameraDiv.style.display = 'block'
-        if (stream) return;
+        const endpoint = `/api/images/feed?page=${page}&size=5`;
+
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            video.srcObject = stream;
-        } catch (err) {
-            alert('Unable to access camera: ' + err.message);
+            const res = await fetch(endpoint, {credentials: 'same-origin'});
+            if (!res.ok) throw new Error(res.status);
+            const {page: p, items, total, size} = await res.json();
+            currentPage = p;
+            totalPages = Math.ceil(total / size);
+            renderGallery(items);
+            renderPagination();
+        } catch (e) {
+            gallery.innerHTML = `<p class="error">Error: ${e.message}</p>`;
         }
-    });
+    }
 
-    stopCamBtn.addEventListener('click', () => {
-        if (!stream) return;
-        stream.getTracks().forEach(t => t.stop());
-        stream = null;
-        cameraDiv.style.display = 'none';
-    });
+    function renderGallery(items) {
+        gallery.innerHTML = '';
+        items.forEach(img => {
+            const card = document.createElement('div');
+            card.classList.add('gallery-item');
+            card.innerHTML = `
+                <img src="/uploads/${img.url}" alt="${img.original_name}" />
+                <div class="meta">
+                  <span class="username">${img.username}</span>
+                  <span class="date">${new Date(img.created_at).toLocaleString()}</span>
+                </div>
+                <div class="actions">
+                  <button
+                    class="like-btn"
+                    data-id="${img.id}"
+                    data-liked="${img.liked_by_me}"
+                    ${!authenticated ? 'disabled' : ''}
+                  >
+                    ${img.liked_by_me ? '❤️' : '🤍'} ${img.like_count}
+                  </button>
+                  <button
+                    class="comment-toggle-btn"
+                    data-id="${img.id}"
+                    ${!authenticated ? 'disabled' : ''}
+                  >
+                    💬 ${img.comment_count}
+                  </button>
+                </div>
+                <div class="comments-list hide" id="comments-${img.id}"></div>
+                <div class="comment-form hide" id="cf-${img.id}">
+                  <textarea id="ta-${img.id}" placeholder="Write a comment…"></textarea>
+                  <button class="comment-submit-btn" data-id="${img.id}">Send</button>
+                </div>
+            `;
+            gallery.appendChild(card);
+        });
 
-    captureBtn.addEventListener('click', async () => {
-        if (!stream) return;
+        gallery.querySelectorAll('.like-btn').forEach(btn =>
+            btn.addEventListener('click', toggleLike)
+        );
 
-        const w = video.videoWidth;
-        const h = video.videoHeight;
-        const canvas = document.createElement('canvas');
-        canvas.width  = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
+        gallery.querySelectorAll('.comment-toggle-btn').forEach(btn =>
+            btn.addEventListener('click', async e => {
+                const id = e.currentTarget.dataset.id;
+                const list = document.getElementById(`comments-${id}`);
+                const form = document.getElementById(`cf-${id}`);
 
-        ctx.drawImage(video, 0, 0, w, h);
+                if (list.classList.contains('hide')) {
+                    list.innerHTML = 'Loading comments…';
+                    try {
+                        const res = await fetch(`/api/images/${id}/comments`, {credentials: 'same-origin'});
+                        if (!res.ok) throw new Error(res.status);
+                        const {comments} = await res.json();
+                        list.innerHTML = comments.map(c => `
+                            <div class="comment">
+                              <strong>${c.username}</strong>
+                              <span class="comment-date">${new Date(c.created_at).toLocaleString()}</span>
+                              <p class="comment-text">${c.comment}</p>
+                            </div>
+                        `).join('') || '<p class="no-comments">No comments yet</p>';
+                    } catch (err) {
+                        console.log(err)
+                        list.innerHTML = `<p class="error">Failed to load comments</p>`;
+                    }
+                }
+                list.classList.toggle('hide');
+                form.classList.toggle('hide');
+            })
+        );
 
-        canvas.toBlob(async blob => {
-            const fd = new FormData();
-            fd.append('image', blob, 'webcam.png');
-            await uploadFormData(fd);
-            await loadGallery();
-        }, 'image/png');
-    });
+        gallery.querySelectorAll('.comment-submit-btn').forEach(btn =>
+            btn.addEventListener('click', submitComment)
+        );
+    }
 
-    async function uploadFormData(fd) {
+    function renderPagination() {
+        pagination.info.textContent = `Page ${currentPage} of ${totalPages}`;
+        pagination.prevBtn.disabled = currentPage <= 1;
+        pagination.nextBtn.disabled = currentPage >= totalPages;
+    }
+
+    pagination.prevBtn.addEventListener('click', () => loadGallery(currentPage - 1));
+    pagination.nextBtn.addEventListener('click', () => loadGallery(currentPage + 1));
+
+    async function toggleLike(e) {
+        const btn = e.currentTarget;
+        const id = btn.dataset.id;
+        const liked = btn.dataset.liked === 'true';
+        const url = liked
+            ? `/api/images/${id}/unlike`
+            : `/api/images/${id}/like`;
+
         try {
-            const res = await fetch('/api/images/upload', {
+            await fetch(url, {
+                method: 'POST',
+                credentials: 'same-origin'
+            });
+            await loadGallery(currentPage);
+        } catch (err) {
+            console.error('Like toggle error', err);
+        }
+    }
+
+    async function submitComment(e) {
+        const btn = e.currentTarget;
+        const id = btn.dataset.id;
+        const ta = document.getElementById(`ta-${id}`);
+        const text = ta.value.trim();
+        if (!text) return alert('Empty comment');
+
+        btn.disabled = true;
+
+        try {
+            const body = new URLSearchParams({comment: text});
+            await fetch(`/api/images/${id}/comments`, {
                 method: 'POST',
                 credentials: 'same-origin',
-                body: fd
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: body.toString()
             });
-            if (!res.ok) throw new Error(res.status);
-        } catch (e) {
-            alert('Loading error: ' + e.message);
+            ta.value = '';
+            await loadGallery(currentPage);
+        } catch (err) {
+            console.error('Comment error', err);
+            alert('Failed to post comment');
+        } finally {
+            if (btn) btn.disabled = false;
         }
     }
+
+    (async () => {
+        await checkAuth();
+        await loadGallery();
+    })();
 });

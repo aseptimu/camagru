@@ -1,8 +1,19 @@
 FROM php:7.4-fpm
 
 RUN apt-get update \
- && apt-get install -y libpq-dev msmtp ca-certificates \
- && docker-php-ext-install pdo_pgsql
+ && apt-get install -y \
+      libpq-dev \
+      msmtp \
+      ca-certificates \
+      libfreetype6-dev \
+      libjpeg62-turbo-dev \
+      libpng-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN docker-php-ext-configure gd \
+      --with-freetype=/usr/include/ \
+      --with-jpeg=/usr/include/ \
+ && docker-php-ext-install -j$(nproc) gd pdo_pgsql
 
 RUN pecl install xdebug-2.9.8 \
  && docker-php-ext-enable xdebug

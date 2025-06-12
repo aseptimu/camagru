@@ -1,0 +1,2 @@
+ALTER TABLE users
+    ADD COLUMN notify_on_comment BOOLEAN NOT NULL DEFAULT TRUE;

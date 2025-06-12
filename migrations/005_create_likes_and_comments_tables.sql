@@ -1,0 +1,15 @@
+CREATE TABLE likes (
+   id SERIAL PRIMARY KEY,
+   user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+   image_id INT NOT NULL REFERENCES images(id) ON DELETE CASCADE,
+   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+   UNIQUE(user_id, image_id)
+);
+
+CREATE TABLE comments (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  image_id INT NOT NULL REFERENCES images(id) ON DELETE CASCADE,
+  comment_text TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

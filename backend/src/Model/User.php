@@ -10,6 +10,7 @@ class User
     private bool $isConfirmed;
     private ?string $confirmationToken;
     private string $createdAt;
+    private bool $notifyOnComment;
 
     public function __construct(
         ?int $id,
@@ -18,7 +19,8 @@ class User
         string $passwordHash,
         bool $isConfirmed,
         ?string $confirmationToken,
-        string $createdAt
+        string $createdAt,
+        string $notifyOnComment
     ) {
         $this->id = $id;
         $this->username = $username;
@@ -27,6 +29,7 @@ class User
         $this->isConfirmed = $isConfirmed;
         $this->confirmationToken = $confirmationToken;
         $this->createdAt = $createdAt;
+        $this->notifyOnComment = $notifyOnComment;
     }
     public function getId(): ?int
     {
@@ -98,15 +101,26 @@ class User
         $this->createdAt = $createdAt;
     }
 
+    public function isNotifyOnComment(): bool
+    {
+        return $this->notifyOnComment;
+    }
+
+    public function setNotifyOnComment(bool $notifyOnComment): void
+    {
+        $this->notifyOnComment = $notifyOnComment;
+    }
+
     public function __toString()
     {
         return sprintf(
-            'User[id=%s username=%s email=%s isConfirmed=%s createdAt=%s]',
+            'User[id=%s username=%s email=%s isConfirmed=%s createdAt=%s notifyOnComment=%s]',
             $this->id,
             $this->username,
             $this->email,
             $this->isConfirmed,
-            $this->createdAt
+            $this->createdAt,
+            $this->notifyOnComment
         );
     }
 
