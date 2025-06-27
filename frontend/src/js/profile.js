@@ -32,6 +32,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const updates = {};
 
+        if (username) {
+            updates.username = username;
+        }
+        if (email) {
+            updates.email = email;
+        }
+
+        if (pass) {
+            if (pass.length < 6) {
+                errorP.textContent = 'Password must be at least 6 characters.';
+                return;
+            }
+            if (pass !== confirm) {
+                errorP.textContent = 'Passwords do not match.';
+                return;
+            }
+            updates.password = pass;
+        }
 
         updates.notifyOnComment = notifyCheck.checked ? '1' : '0';
 
