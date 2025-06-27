@@ -12,9 +12,9 @@ logfile        /var/log/msmtp.log
 account default
 host      smtp.gmail.com
 port      587
-user      asolovey16234@gmail.com
+user
 passwordeval "echo zjdlmzvrnvvqozis"
-from      asolovey16234@gmail.com
+from
 
 EOF
 

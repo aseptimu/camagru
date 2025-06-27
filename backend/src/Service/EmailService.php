@@ -107,7 +107,6 @@ class EmailService
         $body    = "Hello, {$username}!\r\n\r\n"
             . "Someone left a comment on your image:\r\n\r\n"
             . "\"{$comment}\"\r\n\r\n"
-            . "See it here: {$imageUrl}\r\n\r\n"
             . "Best,\r\nCamagru Team";
         $this->send($to, $subject, $body);
     }
