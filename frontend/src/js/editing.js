@@ -61,16 +61,34 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(endpoint, {credentials: 'same-origin'});
             if (!res.ok) throw new Error(res.status);
-            const {items} = await res.json();
+            const { items } = await res.json();
             userImages.innerHTML = '';
             items.forEach(img => {
                 const div = document.createElement('div');
                 div.className = 'thumb';
-                const imageEl = document.createElement('img');
-                imageEl.src = `/uploads/${img.filename}`;
-                div.appendChild(imageEl);
+                div.innerHTML = `
+              <img src="/uploads/${img.filename}" alt="${img.original_name}" />
+              <button class="delete-btn" data-id="${img.id}">Delete</button>
+            `;
                 userImages.appendChild(div);
             });
+
+            userImages.querySelectorAll('.delete-btn').forEach(btn =>
+                btn.addEventListener('click', async e => {
+                    const id = e.currentTarget.dataset.id;
+                    try {
+                        const resp = await fetch(`/api/images/${id}`, {
+                            method: 'DELETE',
+                            credentials: 'same-origin'
+                        });
+                        if (!resp.ok) throw new Error(resp.status);
+                        await loadUserImages();
+                    } catch (err) {
+                        console.error('Delete failed', err);
+                        alert('Failed to delete image');
+                    }
+                })
+            );
         } catch (e) {
             userImages.innerHTML = `<p class="error">Error: ${e.message}</p>`;
         }

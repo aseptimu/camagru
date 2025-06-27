@@ -105,6 +105,29 @@ class ImageController extends Controller
         }
     }
 
+    public function delete(int $id): void
+    {
+        try {
+            $deleted = $this->imageService->delete($id);
+            if (!$deleted) {
+                $this->json([
+                    'error' => 'not found',
+                ], 404);
+            } else {
+                $this->json([
+                    'message' => 'success',
+                ], 204);
+            }
+        } catch (ApiException $e) {
+            http_response_code($e->getCode());
+            echo json_encode(['message' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(['message' => 'Server error']);
+        }
+    }
+
+
 
     /**
      * POST /api/images/{id}/like

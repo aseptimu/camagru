@@ -88,6 +88,44 @@ class ImageService
         );
     }
 
+    /**
+     * @throws ApiException|DatabaseException
+     */
+    public function delete(int $imageId): bool
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $currentUserId = $_SESSION['user_id'] ?? null;
+        if (!$currentUserId) {
+            throw new ApiException('Not authenticated', 401);
+        }
+
+        $img = $this->imageRepository->findById($imageId);
+        if (!$img) {
+            return false;
+        }
+        if ((int)$img['user_id'] !== (int)$currentUserId) {
+            throw new ApiException('Forbidden', 403);
+        }
+
+        $this->pdo->beginTransaction();
+        try {
+            $this->imageRepository->delete($imageId);
+            $filePath = rtrim($this->uploadDir, '/\\') . DIRECTORY_SEPARATOR . $img['filename'];
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
+            $this->pdo->commit();
+            return true;
+        } catch (\Exception $e) {
+            $this->pdo->rollBack();
+            Logger::error('Delete image failed: ' . $e->getMessage());
+            throw new ApiException('Failed to delete image', 500);
+        }
+    }
+
+
     private function composeWithGD(string $userImgPath, string $overlayPath, string $outDir): string
     {
         $base = @\imagecreatefromstring(file_get_contents($userImgPath));

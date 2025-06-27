@@ -13,6 +13,7 @@ $router = new Router();
 $router->add('GET', '/images', [new ImageController(), 'list']);
 $router->add('GET', '/images/feed', [new ImageController(), 'feed']);
 $router->add('POST', '/images/upload', [new ImageController(), 'upload']);
+$router->add('DELETE', '/images/{id}', [new ImageController(), 'delete']);
 $router->add('POST', '/images/{id}/like', [new ImageController(), 'like']);
 $router->add('POST', '/images/{id}/unlike', [new ImageController(), 'unlike']);
 $router->add('POST', '/images/{id}/comments', [new ImageController(), 'addComment']);

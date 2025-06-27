@@ -92,6 +92,19 @@ class ImageRepository
       WHERE img.id = :iid
     ';
 
+    private const DELETE_IMAGE_QUERY = '
+        DELETE FROM images
+        WHERE id = :id
+    ';
+
+    private const FIND_BY_ID_QUERY = '
+        SELECT id, user_id, filename, original_name, created_at
+        FROM images
+        WHERE id = :id
+        LIMIT 1
+    ';
+
+
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
@@ -239,6 +252,37 @@ class ImageRepository
         }
         return $comments;
     }
+
+    /**
+     * @throws DatabaseException
+     */
+    public function delete(int $id): void
+    {
+        try {
+            $stmt = $this->pdo->prepare(self::DELETE_IMAGE_QUERY);
+            $stmt->execute([':id' => $id]);
+        } catch (PDOException $e) {
+            Logger::error('ImageRepository::delete failed: ' . $e->getMessage());
+            throw new DatabaseException('Failed to delete image');
+        }
+    }
+
+    /**
+     * @throws DatabaseException
+     */
+    public function findById(int $id): ?array
+    {
+        try {
+            $stmt = $this->pdo->prepare(self::FIND_BY_ID_QUERY);
+            $stmt->execute([':id' => $id]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row ?: null;
+        } catch (PDOException $e) {
+            Logger::error('ImageRepository::findById failed: ' . $e->getMessage());
+            throw new DatabaseException('Failed to fetch image');
+        }
+    }
+
 
 
     public function getImageOwner(int $imageId): ?array
